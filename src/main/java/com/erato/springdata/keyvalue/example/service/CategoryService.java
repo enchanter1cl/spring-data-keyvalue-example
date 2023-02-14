@@ -1,6 +1,7 @@
 package com.erato.springdata.keyvalue.example.service;
 
 import com.erato.springdata.keyvalue.example.entity.Category;
+import com.erato.springdata.keyvalue.example.vo.CategoryVo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -55,7 +56,7 @@ public interface CategoryService {
      */
     boolean deleteById(Long catId);
     
-    List<Category> listWithTree();
+    List<CategoryVo> listWithTree();
     
-    List<Category> queryAll();
+    List<CategoryVo> queryAll();
 }

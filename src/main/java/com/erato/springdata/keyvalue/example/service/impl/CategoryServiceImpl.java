@@ -3,13 +3,18 @@ package com.erato.springdata.keyvalue.example.service.impl;
 import com.erato.springdata.keyvalue.example.entity.Category;
 import com.erato.springdata.keyvalue.example.dao.CategoryDao;
 import com.erato.springdata.keyvalue.example.service.CategoryService;
+import com.erato.springdata.keyvalue.example.vo.CategoryVo;
+import org.apache.ibatis.javassist.compiler.ast.Variable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import javax.annotation.Resource;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 商品三级分类(Category)表服务实现类
@@ -27,8 +32,42 @@ public class CategoryServiceImpl implements CategoryService {
      * @return list of  categories
      */
     @Override
-    public List<Category> queryAll(){
-        return categoryDao.queryAll();
+    public List<CategoryVo> queryAll(){
+        // Query all the categories
+        List<Category> categories = categoryDao.queryAll();
+        List<CategoryVo> categoryVos = categories.stream().map(category -> {
+            CategoryVo categoryVo = new CategoryVo();
+            BeanUtils.copyProperties(category, categoryVo);
+            return categoryVo;
+        }).collect(Collectors.toList());
+        return categoryVos;
+    }
+    
+    public List<CategoryVo> listWithTree() {
+        //1. Query all the categories
+        List<CategoryVo> categoryVos = this.queryAll();
+        //2. Assemble into a tree structure
+        //2.1 Find all level1 categories
+        List<CategoryVo> level1Cats = categoryVos.stream().filter(category -> category.getParentCid() == 0
+        ).map(categoryVo -> {
+            //2.2 Stuff children
+            categoryVo.setChildren(getChildren(categoryVo, categoryVos));
+            return categoryVo;
+        }).sorted(Comparator.comparingInt(catVo -> catVo.getSort() == null ? 0 : catVo.getSort())
+        ).collect(Collectors.toList());
+        return level1Cats;
+    }
+    
+    private List<CategoryVo> getChildren(CategoryVo root, List<CategoryVo> all) {
+        List<CategoryVo> children = all.stream().filter(category -> category.getParentCid() == root.getCatId()
+        ).map(category -> {
+            CategoryVo categoryVo = new CategoryVo();
+            BeanUtils.copyProperties(category, categoryVo);
+            categoryVo.setChildren(getChildren(categoryVo, all));
+            return categoryVo;
+        }).sorted(Comparator.comparingInt(CategoryVo -> (CategoryVo.getSort() == null ? 0 : CategoryVo.getSort()))
+        ).collect(Collectors.toList());
+        return children;
     }
     
     /**
@@ -88,10 +127,5 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public boolean deleteById(Long catId) {
         return this.categoryDao.deleteById(catId) > 0;
-    }
-    
-    @Override
-    public List<Category> listWithTree() {
-        return null;
     }
 }
