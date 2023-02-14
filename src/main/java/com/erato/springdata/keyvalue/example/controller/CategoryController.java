@@ -22,6 +22,10 @@ public class CategoryController {
     @Resource
     private CategoryService categoryService;
     
+    /**
+     * 3-level catalog of product category. Listed with structure of a tree.
+     * @return
+     */
     @GetMapping("/list/tree")
     public CommonResp queryAll() {
         return CommonResp.ok(this.categoryService.listWithTree());
