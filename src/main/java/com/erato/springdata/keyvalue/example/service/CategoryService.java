@@ -56,9 +56,9 @@ public interface CategoryService {
      */
     boolean deleteById(Long catId);
     
+    /**
+     * 3-level catalog of product category.
+     * @return All categories, listed in a tree structure. The subcategories of each category are in the 'children' field.
+     */
     List<CategoryVo> listWithTree();
-    
-    List<CategoryVo> queryAllFromDb();
-    
-    List<CategoryVo> getCategoryFromCache();
 }

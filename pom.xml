@@ -43,15 +43,21 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.29</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>fastjson</artifactId>-->
+<!--            <version>1.2.73</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>cn.hutool</groupId>-->
+<!--            <artifactId>hutool-json</artifactId>-->
+<!--            <version>5.8.9</version>-->
+<!--        </dependency>-->
+        <!-- json tool kit-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.73</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-json</artifactId>
-            <version>5.8.9</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.13.2</version>
         </dependency>
 
         <dependency>

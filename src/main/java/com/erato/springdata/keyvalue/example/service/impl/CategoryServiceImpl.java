@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.erato.springdata.keyvalue.example.entity.Category;
 import com.erato.springdata.keyvalue.example.dao.CategoryDao;
 import com.erato.springdata.keyvalue.example.service.CategoryService;
+import com.erato.springdata.keyvalue.example.util.JsonUtils;
 import com.erato.springdata.keyvalue.example.vo.CategoryVo;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.StringUtils;
-
 import javax.annotation.Resource;
 import java.util.Comparator;
 import java.util.List;
@@ -42,11 +42,11 @@ public class CategoryServiceImpl implements CategoryService {
     private ObjectMapper OBJECT_MAPPER;
     
     /**
-     * Query all the categories
+     * Query all the categories from db
+     *
      * @return list of  categories
      */
-    @Override
-    public List<CategoryVo> queryAllFromDb(){
+    private List<CategoryVo> queryAllFromDb(){
         // Query all the categories
         List<Category> categories = categoryDao.queryAll();
         List<CategoryVo> categoryVos = categories.stream().map(category -> {
@@ -57,31 +57,27 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryVos;
     }
     
-    public List<CategoryVo> getCategoryFromCache() {
+    /**
+     * Query all categories from the cache, or from the db if they are not queried
+     *
+     * @return list of  categories
+     */
+    private List<CategoryVo> getCategoryFromCache() {
         /* 1. Add cache logic */
         String categoryJSON = strRedisTemplate.opsForValue().get("categoryJSON");
         List<CategoryVo> categoryVoList;
         if (StringUtils.hasText(categoryJSON)) {
             /* 2.1 If it exists in cache. */
-            try {
-                categoryVoList = OBJECT_MAPPER.readValue(categoryJSON, new TypeReference<List<CategoryVo>>() {
-                });
-                return categoryVoList;
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            categoryVoList = JsonUtils.readValue(categoryJSON, new TypeReference<List<CategoryVo>>() {
+            });
         } else {
             /* 2.2 If it doesn't exist in cache. Query Db.  Transfer this java obj to JSON, store it into cache. */
             categoryVoList = this.queryAllFromDb();
-            String categoryJsonValue = null;
-            try {
-                categoryJsonValue = OBJECT_MAPPER.writeValueAsString(categoryVoList);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
+            String categoryJsonValue;
+            categoryJsonValue = JsonUtils.writeValueAsString(categoryVoList);
             strRedisTemplate.opsForValue().set("categoryJSON", categoryJsonValue);
-            return categoryVoList;
         }
+        return categoryVoList;
     }
     
     public List<CategoryVo> listWithTree() {
@@ -99,6 +95,12 @@ public class CategoryServiceImpl implements CategoryService {
         return level1Cats;
     }
     
+    /**
+     * Recursively query each root category's subcategories
+     * @param root  each super category
+     * @param all  the whole list of categories
+     * @return
+     */
     private List<CategoryVo> getChildren(CategoryVo root, List<CategoryVo> all) {
         List<CategoryVo> children = all.stream().filter(category -> category.getParentCid() == root.getCatId()
         ).map(category -> {
