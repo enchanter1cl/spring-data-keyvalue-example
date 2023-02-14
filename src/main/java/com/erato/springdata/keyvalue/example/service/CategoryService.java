@@ -58,5 +58,7 @@ public interface CategoryService {
     
     List<CategoryVo> listWithTree();
     
-    List<CategoryVo> queryAll();
+    List<CategoryVo> queryAllFromDb();
+    
+    List<CategoryVo> getCategoryFromCache();
 }
