@@ -4,7 +4,7 @@ import com.erato.springdata.keyvalue.example.entity.Category;
 import com.erato.springdata.keyvalue.example.service.CategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
+import com.erato.springdata.keyvalue.example.vo.CommonResp;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -18,16 +18,13 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("category")
 public class CategoryController {
-    /**
-     * 服务对象
-     */
+
     @Resource
     private CategoryService categoryService;
     
     @GetMapping("/list/tree")
-    public ResponseEntity queryAll() {
-    
-        return ResponseEntity.ok(this.categoryService.listWithTree());
+    public CommonResp queryAll() {
+        return CommonResp.ok(this.categoryService.listWithTree());
     }
     
     /**
@@ -38,8 +35,8 @@ public class CategoryController {
      * @return 查询结果
      */
     @GetMapping
-    public ResponseEntity<Page<Category>> queryByPage(Category category, PageRequest pageRequest) {
-        return ResponseEntity.ok(this.categoryService.queryByPage(category, pageRequest));
+    public CommonResp<Page<Category>> queryByPage(Category category, PageRequest pageRequest) {
+        return CommonResp.ok(this.categoryService.queryByPage(category, pageRequest));
     }
     
     /**
@@ -49,8 +46,8 @@ public class CategoryController {
      * @return 单条数据
      */
     @GetMapping("{id}")
-    public ResponseEntity<Category> queryById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(this.categoryService.queryById(id));
+    public CommonResp<Category> queryById(@PathVariable("id") Long id) {
+        return CommonResp.ok(this.categoryService.queryById(id));
     }
     
     /**
@@ -60,8 +57,8 @@ public class CategoryController {
      * @return 新增结果
      */
     @PostMapping
-    public ResponseEntity<Category> add(Category category) {
-        return ResponseEntity.ok(this.categoryService.insert(category));
+    public CommonResp<Category> add(Category category) {
+        return CommonResp.ok(this.categoryService.insert(category));
     }
     
     /**
@@ -71,8 +68,8 @@ public class CategoryController {
      * @return 编辑结果
      */
     @PutMapping
-    public ResponseEntity<Category> edit(Category category) {
-        return ResponseEntity.ok(this.categoryService.update(category));
+    public CommonResp<Category> edit(Category category) {
+        return CommonResp.ok(this.categoryService.update(category));
     }
     
     /**
@@ -82,8 +79,8 @@ public class CategoryController {
      * @return 删除是否成功
      */
     @DeleteMapping
-    public ResponseEntity<Boolean> deleteById(Long id) {
-        return ResponseEntity.ok(this.categoryService.deleteById(id));
+    public CommonResp<Boolean> deleteById(Long id) {
+        return CommonResp.ok(this.categoryService.deleteById(id));
     }
     
 }
